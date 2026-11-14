@@ -110,6 +110,8 @@ in {
     enable = true;
     settings = {
       Resolve = {
+        # ipv6 support
+        DNSStubListenerExtra = "[::1]:53";
         DNSSEC = false;
         # DNSSEC = "allow-downgrade";
         DNSOverTLS = "opportunistic";
