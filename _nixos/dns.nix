@@ -70,8 +70,8 @@ in {
         text = ''
           set -x
           set +e
-          if [ -f "${config}" ]; then
-            ${pkgs.coreutils}/bin/ln -fs ${config} /etc/resolv.conf
+          if [ -e "${config}" ]; then
+            ${pkgs.coreutils}/bin/ln -fs ${config} /etc/resolv.conf || ${pkgs.coreutils}/bin/cp -f ${config} /etc/resolv.conf
           fi
           exit 0
         '';
@@ -85,11 +85,11 @@ in {
         text = ''
               set -x
               set +e
-              if [ -f "/etc/static/resolv.conf.d/reslov.conf.nymdefault" ]; then
-                ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.d/resolv.conf.nymdefault /etc/resolv.conf
-              elif [ -f "/etc/static/resolv.conf.nymbackup" ]; then
+              if [ -e "/etc/resolv.conf.d/reslov.conf.nymdefault" ]; then
+                ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.d/resolv.conf.nymdefault /etc/resolv.conf || ${pkgs.coreutils}/bin/cp -f /etc/resolv.conf.d/resolv.conf.nymdefault /etc/resolv.conf
+              elif [ -e "/etc/resolv.conf.nymbackup" ]; then
           deuun.aspects.private.network
-                ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.nymbackup /etc/resolv.conf
+                ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.nymbackup /etc/resolv.conf || ${pkgs.coreutils}/bin/cp -f /etc/resolv.conf.nymbackup /etc/resolv.conf
               fi
               exit 0
         '';
