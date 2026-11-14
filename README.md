@@ -65,6 +65,20 @@ user,
         version = "2026.15.0";
         sha256 = "sha256-SkbS2fs9ytC8r3PvHrw7/PDyjq1M1TAEsM7QuMTgD80=";
     };
+    # Whether you can access LAN while connected to the VPN
+    lan = {
+      enable = true;
+    };
+    # Add default nameservers,
+    # You can query a local nameserver when LAN access is enabled
+    nameservers = [
+      # home
+      "192.168.1.1"
+      "fe80::1"
+      # quad9
+      "9.9.9.9"
+      "2620:fe::fe"
+    ];
   };
 }
 ```
