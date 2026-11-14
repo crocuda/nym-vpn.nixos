@@ -68,6 +68,20 @@ in {
         ''
         else ""
       )
+      + (
+        if (config.services.${moduleName}.lan.enable == true)
+        then
+          ''
+            sleep 2
+            ${nym-vpn-core}/bin/nym-vpnc lan set allow
+            ${nym-vpn-core}/bin/nym-vpnc dns clear
+            ${nym-vpn-core}/bin/nym-vpnc dns enable
+          ''
+          + (concatMapStrings
+            (x: "${nym-vpn-core}/bin/nym-vpnc dns set --udp ${x}\n")
+            config.services.${moduleName}.lan.nameservers)
+        else ""
+      )
       + ''
         exit 0
       '';

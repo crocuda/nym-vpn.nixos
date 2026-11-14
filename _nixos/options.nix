@@ -15,6 +15,16 @@ in {
       '';
       description = "List of users for whom to allow nym vpn usage (polkit).";
     };
+    lan = {
+      enable = mkEnableOption "Wether to block or allow connection to lan.";
+      nameservers = mkOption {
+        type = types.listOf types.str;
+        example = ''
+          ["192.168.1.1"]
+        '';
+        description = "List of local dns to allow.";
+      };
+    };
     account.secret.enable = mkOption {
       type = types.bool;
       default = false;

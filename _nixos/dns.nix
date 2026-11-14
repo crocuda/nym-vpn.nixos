@@ -18,6 +18,26 @@ in {
     + "options edns0 trust-ad"
   );
 
+  # To be paired with `nym-vpnc lan set allow`.
+  # Allow
+  environment.etc."resolv.conf.d/resolv.conf.systemd-resolved".text = mkDefault (
+    ''
+      nameserver 127.0.0.53
+    ''
+    + concatMapStrings
+    (x: "nameserver ${x}\n")
+    config.services.${moduleName}.lan.nameservers
+    + ''
+      options edns0 trust-ad"
+      search .
+    ''
+  );
+
+  # Allow file modification
+  systemd.tmpfiles.rules = [
+    "z /etc/resolv.conf 0755 root users"
+  ];
+
   ## Add some tweaks to the default service.
   systemd.services.systemd-resolved = {
     # overrideStrategy = "asDropin";
@@ -45,7 +65,8 @@ in {
       # Recreate a compatible /etc/resolv.conf that points to this service.
       ExecStartPre = let
         name = "systemd-resolved-start-script";
-        config = "/run/systemd/reslove/stub/stub-resolv.conf";
+        # config = "/run/systemd/reslove/stub/stub-resolv.conf";
+        config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
         text = ''
           set -x
           set +e
@@ -54,21 +75,23 @@ in {
           fi
           exit 0
         '';
+
         script = pkgs.writeShellScriptBin name text;
       in "${script}/bin/${name}";
       # On stop.
       # Recreate a default /etc/resolv.conf usable as is and unbound.
-      ExecStopPost = let
+      ExecStop = let
         name = "nym-vpnd-stop-script";
         text = ''
-          set -x
-          set +e
-          if [ -f "/etc/resolv.conf.d/reslov.conf.nymdefault" ]; then
-            ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.d/resolv.conf.nymdefault /etc/resolv.conf
-          elif [ -f "/etc/resolv.conf.nymbackup" ]; then
-            ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.nymbackup /etc/resolv.conf
-          fi
-          exit 0
+              set -x
+              set +e
+              if [ -f "/etc/static/resolv.conf.d/reslov.conf.nymdefault" ]; then
+                ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.d/resolv.conf.nymdefault /etc/resolv.conf
+              elif [ -f "/etc/static/resolv.conf.nymbackup" ]; then
+          deuun.aspects.private.network
+                ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.nymbackup /etc/resolv.conf
+              fi
+              exit 0
         '';
         script = pkgs.writeShellScriptBin name text;
       in "${script}/bin/${name}";
