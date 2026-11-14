@@ -76,16 +76,6 @@ in {
     pkgs.coreutils
   ];
 
-  ### Firewall/ Blacklisting error
-  services.resolved = {
-    enable = true;
-    settings = {
-      Resolve.DNSSEC = false;
-      # Resolve.DNSSEC = "allow-downgrade";
-      Resolve.DNSOverTLS = "opportunistic";
-    };
-  };
-
   # NYM DAEMON
   systemd.services.nym-vpnd = {
     description = "nym-vpnd daemon";

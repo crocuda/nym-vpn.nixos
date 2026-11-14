@@ -109,9 +109,11 @@ in {
   services.resolved = {
     enable = true;
     settings = {
-      Resolve.DNSSEC = false;
-      # Resolve.DNSSEC = "allow-downgrade";
-      Resolve.DNSOverTLS = "opportunistic";
+      Resolve = {
+        DNSSEC = false;
+        # DNSSEC = "allow-downgrade";
+        DNSOverTLS = "opportunistic";
+      };
     };
   };
 

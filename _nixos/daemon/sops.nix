@@ -74,7 +74,7 @@ in {
           ''
             sleep 2
             ${nym-vpn-core}/bin/nym-vpnc lan set allow
-            ${nym-vpn-core}/bin/nym-vpnc dns clear
+            # ${nym-vpn-core}/bin/nym-vpnc dns clear
             ${nym-vpn-core}/bin/nym-vpnc dns enable
           ''
           + (concatMapStrings
