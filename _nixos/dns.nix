@@ -154,9 +154,6 @@ in {
     in "${script}/bin/${name}";
   in {
     systemd-resolved = {
-      after = [
-        "unbound.service"
-      ];
       # Stop if unbound is running.
       conflicts = with lib;
         mkMerge [
@@ -169,27 +166,26 @@ in {
           ["resolvconf.service"]
         ];
     };
-
-    unbound = {
-      before = ["systemd-resolved.service"];
-      conflicts = [
-        "systemd-resolved.service"
-        "nym-vpnd.service"
-      ];
-    };
-
     "systemd-resolved-update-resolvconf" = {
       after = [
         "systemd-resolved.service"
         "systemd-tmpfiles-setup.service"
         "systemd-tmpfiles-resetup.service"
       ];
-      requiredBy = ["systemd-resolved.service"];
+      wantedBy = ["systemd-resolved.service"];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = systemdResolvedResolvconf;
         ExecStop = defaultResolvconf;
       };
+    };
+
+    unbound = {
+      after = ["systemd-resolved.service"];
+      before = ["nym-vpnd.service"];
+      conflicts = [
+        "systemd-resolved.service"
+      ];
     };
     "unbound-update-resolvconf" = {
       after = [
@@ -197,7 +193,7 @@ in {
         "systemd-tmpfiles-setup.service"
         "systemd-tmpfiles-resetup.service"
       ];
-      requiredBy = ["unbound.service"];
+      wantedBy = ["unbound.service"];
       serviceConfig = {
         Type = "oneshot";
         ExecStart = unboundResolvconf;
