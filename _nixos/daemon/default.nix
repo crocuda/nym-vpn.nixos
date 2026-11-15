@@ -87,7 +87,6 @@ in {
       "NetworkManager.service"
     ];
     before = ["network-online.target"];
-
     bindsTo = mkDefault ["systemd-resolved.service"];
     # requires = ["systemd-resolved.service"];
     # wants = ["systemd-resolved.service"];

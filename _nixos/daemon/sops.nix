@@ -25,66 +25,70 @@ in {
   # Only on nixos generation rebuild and if sops is enabled.
   #
   # Reads the secret, connect to nym account, then delete the secret.
-  systemd.services.nym-vpnd.after = with lib;
-    mkMerge [
-      (mkIf (
-        (config.services.${moduleName}.account.secret.enable == true)
-        # && (builtins.hasAttr "sops" options)
-      ) ["sops-install-secrets.service"])
-    ];
+  systemd.services.nym-vpnd = {
+    after = with lib;
+      mkMerge [
+        (mkIf (
+          (config.services.${moduleName}.account.secret.enable == true)
+          # && (builtins.hasAttr "sops" options)
+        ) ["sops-install-secrets.service"])
+      ];
 
-  systemd.services.nym-vpnd.serviceConfig.ExecStartPost = with lib; let
-    name = "nym-vpnd-connect-script";
-    text =
-      ''
-        set -x
-        set +e
-      ''
-      + (
-        if (config.services.${moduleName}.account.secret.enable == true)
-        # && (builtins.hasAttr "sops" options)
-        then
-          # Connect to account
+    serviceConfig = {
+      ExecStartPost = with lib; let
+        name = "nym-vpnd-connect-script";
+        text =
           ''
-            if [ -f "${config.sops.secrets."nymvpn/secret".path}" ]; then
-              NYM_SECRET=$(cat ${config.sops.secrets."nymvpn/secret".path})
-              NYM_SECRET=$(echo $NYM_SECRET)
-              ${nym-vpn-core}/bin/nym-vpnc account set "$NYM_SECRET"
-            fi
+            set -x
+            set +e
           ''
-          # Delete secret
+          + (
+            if (config.services.${moduleName}.account.secret.enable == true)
+            # && (builtins.hasAttr "sops" options)
+            then
+              # Connect to account
+              ''
+                if [ -f "${config.sops.secrets."nymvpn/secret".path}" ]; then
+                  NYM_SECRET=$(cat ${config.sops.secrets."nymvpn/secret".path})
+                  NYM_SECRET=$(echo $NYM_SECRET)
+                  ${nym-vpn-core}/bin/nym-vpnc account set "$NYM_SECRET"
+                fi
+              ''
+              # Delete secret
+              + ''
+                if [ -f "${config.sops.secrets."nymvpn/secret".path}" ]; then
+                  rm -rf ${config.sops.secrets."nymvpn/secret".path}
+                fi
+              ''
+            else ""
+          )
+          + (
+            if (config.services.${moduleName}.lan.enable == true)
+            then
+              ''
+                sleep 2
+                ${nym-vpn-core}/bin/nym-vpnc lan set allow
+                # ${nym-vpn-core}/bin/nym-vpnc dns clear
+                ${nym-vpn-core}/bin/nym-vpnc dns enable
+              ''
+              + (concatMapStrings
+                (x: "${nym-vpn-core}/bin/nym-vpnc dns set --udp ${x}\n")
+                config.services.${moduleName}.lan.nameservers)
+            else ""
+          )
+          + (
+            if (config.services.${moduleName}.autoconnect.enable == true)
+            then ''
+              sleep 2
+              ${nym-vpn-core}/bin/nym-vpnc connect --wait
+            ''
+            else ""
+          )
           + ''
-            if [ -f "${config.sops.secrets."nymvpn/secret".path}" ]; then
-              rm -rf ${config.sops.secrets."nymvpn/secret".path}
-            fi
-          ''
-        else ""
-      )
-      + (
-        if (config.services.${moduleName}.autoconnect.enable == true)
-        then ''
-          sleep 2
-          ${nym-vpn-core}/bin/nym-vpnc connect --wait
-        ''
-        else ""
-      )
-      + (
-        if (config.services.${moduleName}.lan.enable == true)
-        then
-          ''
-            sleep 2
-            ${nym-vpn-core}/bin/nym-vpnc lan set allow
-            # ${nym-vpn-core}/bin/nym-vpnc dns clear
-            ${nym-vpn-core}/bin/nym-vpnc dns enable
-          ''
-          + (concatMapStrings
-            (x: "${nym-vpn-core}/bin/nym-vpnc dns set --udp ${x}\n")
-            config.services.${moduleName}.lan.nameservers)
-        else ""
-      )
-      + ''
-        exit 0
-      '';
-    script = pkgs.writeShellScriptBin name text;
-  in "${script}/bin/${name}";
+            exit 0
+          '';
+        script = pkgs.writeShellScriptBin name text;
+      in "${script}/bin/${name}";
+    };
+  };
 }
