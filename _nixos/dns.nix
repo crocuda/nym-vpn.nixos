@@ -104,7 +104,7 @@ in {
     # Recreate a default /etc/resolv.conf
     defaultResolvconf = let
       name = "systemd-resolved-resolvconf";
-      config = "/etc/resolv.conf/resolv.conf.default";
+      config = "/run/systemd/reslove/resolv.conf";
       # config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
       text = ''
         set -x
@@ -119,8 +119,8 @@ in {
     # Recreate a compatible /etc/resolv.conf that points to systemd-resolved.
     systemdResolvedResolvconf = let
       name = "systemd-resolved-resolvconf";
-      # config = "/run/systemd/reslove/stub/stub-resolv.conf";
-      config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
+      config = "/run/systemd/reslove/stub-resolv.conf";
+      # config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
       text = ''
         set -x
         set +e
