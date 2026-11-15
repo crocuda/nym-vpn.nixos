@@ -83,13 +83,17 @@ in {
     after = [
       # Dns
       "unbound.service"
+
       "systemd-resolved.service"
+      "systemd-resolved-update-resolvconf.service"
+
       "NetworkManager.service"
     ];
     before = ["network-online.target"];
-    bindsTo = mkDefault ["systemd-resolved.service"];
+
+    # bindsTo = mkDefault ["systemd-resolved.service"];
     # requires = ["systemd-resolved.service"];
-    # wants = ["systemd-resolved.service"];
+    wants = ["systemd-resolved.service"];
 
     wantedBy = [
       "multi-user.target"

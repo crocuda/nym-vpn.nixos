@@ -24,10 +24,15 @@ in {
     # /etc/resolv.conf and brings back default behavior (without any local DNS resolver).
     "resolv.conf.d/resolv.conf.default".text = mkDefault (
       description
-      + "# Raw /etc/resolv.conf\n"
+      + ''
+        #
+        # Raw /etc/resolv.conf
+        #
+      ''
       + (concatMapStrings (x: "nameserver ${x}\n") config.networking.nameservers)
       ''
         options edns0 trust-ad
+        search .
       ''
     );
 
@@ -35,10 +40,14 @@ in {
     # When unbound starts, this file is symlinked to /etc/resolv.conf
     "resolv.conf.d/resolv.conf.unbound".text = mkDefault (
       description
-      + "# Unbound\n"
       + ''
-        nameserver 127.0.0.1
+        #
+        # Unbound
+        #
+      ''
+      + ''
         nameserver ::1
+        nameserver 127.0.0.1
         options edns0 trust-ad
       ''
     );
@@ -46,7 +55,11 @@ in {
     # When systemd-resolved starts, this file is symlinked to /etc/resolv.conf
     "resolv.conf.d/resolv.conf.systemd-resolved".text = mkDefault (
       description
-      + "# Systemd-resolved\n"
+      + ''
+        #
+        # Systemd-resolved
+        #
+      ''
       + ''
         nameserver 127.0.0.53
         nameserver ::1
@@ -71,6 +84,13 @@ in {
         # ipv6 support
         DNSStubListenerExtra = "[::1]:53";
         DNSSEC = false;
+        DNS = mkMerge [
+          (
+            mkIf (config.services.${moduleName}.lan.enable == true)
+            config.services.${moduleName}.lan.nameservers
+          )
+        ];
+        Domains = [""];
         # DNSSEC = "allow-downgrade";
         DNSOverTLS = "opportunistic";
       };
@@ -159,7 +179,11 @@ in {
     };
 
     "systemd-resolved-update-resolvconf" = {
-      after = ["systemd-resolved.service"];
+      after = [
+        "systemd-resolved.service"
+        "systemd-tmpfiles-setup.service"
+        "systemd-tmpfiles-resetup.service"
+      ];
       requiredBy = ["systemd-resolved.service"];
       serviceConfig = {
         Type = "oneshot";
@@ -168,7 +192,11 @@ in {
       };
     };
     "unbound-update-resolvconf" = {
-      # after = ["unbound.service"];
+      after = [
+        "unbound.service"
+        "systemd-tmpfiles-setup.service"
+        "systemd-tmpfiles-resetup.service"
+      ];
       requiredBy = ["unbound.service"];
       serviceConfig = {
         Type = "oneshot";
