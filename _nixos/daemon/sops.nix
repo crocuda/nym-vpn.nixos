@@ -5,7 +5,8 @@
   pkgs,
   nym-vpn-core,
   ...
-}: let
+}:
+with lib; let
   moduleName = "nymvpn";
 in {
   imports = [
@@ -26,13 +27,12 @@ in {
   #
   # Reads the secret, connect to nym account, then delete the secret.
   systemd.services.nym-vpnd = {
-    after = with lib;
-      mkMerge [
-        (mkIf (
-          (config.services.${moduleName}.account.secret.enable == true)
-          # && (builtins.hasAttr "sops" options)
-        ) ["sops-install-secrets.service"])
-      ];
+    after = mkMerge [
+      (mkIf (
+        (config.services.${moduleName}.account.secret.enable == true)
+        # && (builtins.hasAttr "sops" options)
+      ) ["sops-install-secrets.service"])
+    ];
 
     serviceConfig = {
       ExecStartPost = with lib; let
@@ -62,31 +62,35 @@ in {
               ''
             else ""
           )
-          + (
-            if (config.services.${moduleName}.lan.enable == true)
-            then
-              ''
-                sleep 2
-                ${nym-vpn-core}/bin/nym-vpnc lan set allow
-                # ${nym-vpn-core}/bin/nym-vpnc dns clear
-                ${nym-vpn-core}/bin/nym-vpnc dns enable
-              ''
-              + (concatMapStrings
-                (x: "${nym-vpn-core}/bin/nym-vpnc dns set --udp ${x}\n")
-                config.services.${moduleName}.lan.nameservers)
-            else ""
-          )
-          + (
-            if (config.services.${moduleName}.autoconnect.enable == true)
-            then ''
-              sleep 2
-              ${nym-vpn-core}/bin/nym-vpnc connect --wait
-            ''
-            else ""
-          )
           + ''
             exit 0
           '';
+        script = pkgs.writeShellScriptBin name text;
+      in "${script}/bin/${name}";
+    };
+  };
+
+  systemd.services.nym-vpnd.wants =
+    if config.services.${moduleName}.autoconnect.enable
+    then [
+      "nym-vpnd-autoconnect.service"
+    ]
+    else [];
+  systemd.services.nym-vpnd-autoconnect = {
+    enable = config.services.${moduleName}.autoconnect.enable;
+    after = ["nym-vpnd.service"];
+
+    serviceConfig = {
+      Type = "oneshot";
+      Restart = "on-failure";
+      RestartSec = 2;
+
+      ExecStart = with lib; let
+        name = "nym-vpnd-autoconnect-script";
+        text = ''
+          set -x
+          ${nym-vpn-core}/bin/nym-vpnc connect --wait
+        '';
         script = pkgs.writeShellScriptBin name text;
       in "${script}/bin/${name}";
     };

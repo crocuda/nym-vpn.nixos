@@ -156,4 +156,30 @@ in {
       PrivateNetwork = false;
     };
   };
+
+  systemd.services.nym-vpnd-dns = {
+    enable = config.services.${moduleName}.autoconnect.enable;
+    after = ["nym-vpnd.service"];
+
+    serviceConfig = {
+      Type = "oneshot";
+      Restart = "on-failure";
+      RestartSec = 2;
+
+      ExecStart = with lib; let
+        name = "nym-vpnd-set-dns-script";
+        text =
+          ''
+            set -x
+            ${nym-vpn-core}/bin/nym-vpnc lan set allow
+            # ${nym-vpn-core}/bin/nym-vpnc dns clear
+            ${nym-vpn-core}/bin/nym-vpnc dns enable
+          ''
+          + (concatMapStrings
+            (x: "${nym-vpn-core}/bin/nym-vpnc dns set --udp ${x}\n")
+            config.services.${moduleName}.lan.nameservers);
+        script = pkgs.writeShellScriptBin name text;
+      in "${script}/bin/${name}";
+    };
+  };
 }

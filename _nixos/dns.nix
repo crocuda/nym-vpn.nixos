@@ -152,19 +152,24 @@ in {
       '';
       script = pkgs.writeShellScriptBin name text;
     in "${script}/bin/${name}";
+
+    # Stop if unbound is running.
+    conflicts = with lib;
+      mkMerge [
+        (mkIf ((config.services.unbound.enable == true)
+            && (config.services.nsd.port == 53)) ["nsd.service"])
+        (mkIf
+          ((config.services.unbound.enable == true)
+            || (config.services.unbound.settings.server.port == "53"))
+          ["unbound.service"])
+        ["resolvconf.service"]
+      ];
   in {
     systemd-resolved = {
-      # Stop if unbound is running.
-      conflicts = with lib;
-        mkMerge [
-          (mkIf ((config.services.unbound.enable == true)
-              && (config.services.nsd.port == 53)) ["nsd.service"])
-          (mkIf
-            ((config.services.unbound.enable == true)
-              || (config.services.unbound.settings.server.port == "53"))
-            ["unbound.service"])
-          ["resolvconf.service"]
-        ];
+      inherit conflicts;
+    };
+    nym-vpnd = {
+      inherit conflicts;
     };
     "systemd-resolved-update-resolvconf" = {
       after = [
