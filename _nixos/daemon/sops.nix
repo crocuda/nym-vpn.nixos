@@ -6,9 +6,7 @@
   nym-vpn-core,
   ...
 }:
-with lib; let
-  moduleName = "nym-vpn";
-in {
+with lib; {
   imports = [
     # inputs.sops-nix.nixosModules.sops
   ];
@@ -29,7 +27,7 @@ in {
   systemd.services.nym-vpnd = {
     after = mkMerge [
       (mkIf (
-        (config.services.${moduleName}.account.secret.enable == true)
+        (config.services.nym-vpn.account.secret.enable == true)
         # && (builtins.hasAttr "sops" options)
       ) ["sops-install-secrets.service"])
     ];
@@ -43,7 +41,7 @@ in {
             set +e
           ''
           + (
-            if (config.services.${moduleName}.account.secret.enable == true)
+            if (config.services.nym-vpn.account.secret.enable == true)
             # && (builtins.hasAttr "sops" options)
             then
               # Connect to account
@@ -71,13 +69,13 @@ in {
   };
 
   systemd.services.nym-vpnd.wants =
-    if config.services.${moduleName}.autoconnect.enable
+    if config.services.nym-vpn.autoconnect.enable
     then [
       "nym-vpnd-autoconnect.service"
     ]
     else [];
   systemd.services.nym-vpnd-autoconnect = {
-    enable = config.services.${moduleName}.autoconnect.enable;
+    enable = config.services.nym-vpn.autoconnect.enable;
     after = ["nym-vpnd.service"];
 
     serviceConfig = {
@@ -85,7 +83,7 @@ in {
       Restart = "on-failure";
       RestartSec = 2;
 
-      ExecStart = with lib; let
+      ExecStart = let
         name = "nym-vpnd-autoconnect-script";
         text = ''
           set -x

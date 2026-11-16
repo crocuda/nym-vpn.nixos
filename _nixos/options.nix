@@ -1,9 +1,7 @@
 {lib, ...}:
-with lib; let
-  moduleName = "nym-vpn";
-in {
-  options.services.${moduleName} = {
-    enable = mkEnableOption "Enable ${moduleName}.";
+with lib; {
+  options.services.nym-vpn = {
+    enable = mkEnableOption "Enable NymVPN daemon.";
     logLevel = mkOption {
       default = "debug";
       type = types.enum ["error" "warn" "info" "debug" "trace"];

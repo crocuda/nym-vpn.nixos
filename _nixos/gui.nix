@@ -51,7 +51,7 @@ with lib; let
   };
 in {
   config = mkMerge [
-    (mkIf (config.services.${moduleName}.gui.enable == true)
+    (mkIf (config.services.nym-vpn.gui.enable == true)
       {
         environment.systemPackages = [
           nym-vpn-app

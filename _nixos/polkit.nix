@@ -4,11 +4,9 @@
   pkgs,
   ...
 }: let
-  moduleName = "nym-vpn";
-
   # Users allowed to access the NymVPN daemon through Polkit.
   # Change this to your local username(s).
-  allowedNymVpnUsers = config.services.${moduleName}.users;
+  allowedNymVpnUsers = config.services.nym-vpn.users;
 in {
   security.polkit = {
     enable = true;

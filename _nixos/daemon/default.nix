@@ -6,22 +6,22 @@
   ...
 }:
 with lib; let
-  moduleName = "nym-vpn";
-  nym-vpn-core = self.packages.nym-vpn-core;
+  nym-vpn-core = import ../packages/core.nix;
 in {
   # Sops
   imports = [
-    (import ./sops.nix {
-      inherit lib;
-      inherit config;
-      inherit options;
-      inherit pkgs;
-      inherit nym-vpn-core;
-    })
   ];
+  #   (import ./sops.nix {
+  #     inherit lib;
+  #     inherit config;
+  #     inherit options;
+  #     inherit pkgs;
+  #     inherit nym-vpn-core;
+  #   })
+  # ];
 
   environment.systemPackages = with pkgs; [
-    self.packages.nym-vpn-core
+    # self.packages.nym-vpn-core
     # nym-vpn-core
 
     xdg-utils
@@ -80,7 +80,7 @@ in {
           "debug" = "-v";
           "trace" = "-vv";
         }.${
-          config.services.${moduleName}.logLevel
+          config.services.nym-vpn.logLevel
         };
     in {
       # ExecStart = "${nym-vpn-core}/bin/nym-vpnd -v run-as-service";
@@ -113,7 +113,7 @@ in {
   };
 
   systemd.services.nym-vpnd-dns = {
-    enable = config.services.${moduleName}.autoconnect.enable;
+    enable = config.services.nym-vpn.autoconnect.enable;
     after = ["nym-vpnd.service"];
 
     serviceConfig = {
@@ -132,7 +132,7 @@ in {
           ''
           + (concatMapStrings
             (x: "${nym-vpn-core}/bin/nym-vpnc dns set --udp ${x}\n")
-            config.services.${moduleName}.lan.nameservers);
+            config.services.nym-vpn.lan.nameservers);
         script = pkgs.writeShellScriptBin name text;
       in "${script}/bin/${name}";
     };
