@@ -6,7 +6,7 @@
   ...
 }:
 with lib; let
-  moduleName = "nymvpn";
+  moduleName = "nym-vpn";
 in {
   environment.etc = let
     description = ''
@@ -179,7 +179,7 @@ in {
       ];
       wantedBy = ["systemd-resolved.service"];
       serviceConfig = {
-        Type = "oneshot";
+        # Type = "oneshot";
         ExecStart = systemdResolvedResolvconf;
         ExecStop = defaultResolvconf;
       };
@@ -200,7 +200,7 @@ in {
       ];
       wantedBy = ["unbound.service"];
       serviceConfig = {
-        Type = "oneshot";
+        # Type = "oneshot";
         ExecStart = unboundResolvconf;
         ExecStop = defaultResolvconf;
       };

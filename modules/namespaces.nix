@@ -4,7 +4,7 @@
   ...
 }: {
   imports = [
-    (inputs.den.namespace "nymvpn" true)
+    (inputs.den.namespace "nym-vpn" true)
   ];
   _module.args.__findFile = den.lib.__findFile;
 }

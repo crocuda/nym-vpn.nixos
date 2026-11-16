@@ -1,6 +1,6 @@
 {lib, ...}:
 with lib; let
-  moduleName = "nymvpn";
+  moduleName = "nym-vpn";
 in {
   options.services.${moduleName} = {
     enable = mkEnableOption "Enable ${moduleName}.";

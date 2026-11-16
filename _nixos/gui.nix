@@ -6,7 +6,7 @@
   ...
 }:
 with lib; let
-  moduleName = "nymvpn";
+  moduleName = "nym-vpn";
 
   nym-vpn-app = let
     nymVpnAppVersion = config.services.${moduleName}.gui.version;

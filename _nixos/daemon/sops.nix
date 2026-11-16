@@ -7,7 +7,7 @@
   ...
 }:
 with lib; let
-  moduleName = "nymvpn";
+  moduleName = "nym-vpn";
 in {
   imports = [
     # inputs.sops-nix.nixosModules.sops

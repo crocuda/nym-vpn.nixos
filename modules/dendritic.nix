@@ -2,54 +2,52 @@
   self,
   inputs,
   ...
-}: {
+}: let
+  moduleName = "nym-vpn";
+in {
   imports = [
     (inputs.flake-parts.flakeModules.flakeModules or {})
     (inputs.flake-file.flakeModules.dendritic or {})
     (inputs.den.flakeModules.dendritic or {})
   ];
 
-  # flake-file.inputs = {
-  # den.url = "github:denful/den";
-  # };
-
-  nymvpn.aspects = rec {
-    default = nymvpn;
-    nymvpn = {
+  ${moduleName}.aspects = rec {
+    default = "${moduleName}";
+    ${moduleName} = {
       nixos = {
         config,
         user,
         ...
       }: {
         imports = [
-          self.nixosModules.nymvpn
+          self.nixosModules.default
         ];
-        config.services.nymvpn.users = [user.userName];
+        config.services.${moduleName}.users = [user.userName];
       };
     };
-    nymvpn.sops = {
+    ${moduleName}.sops = {
       nixos = {
         config,
         user,
         ...
       }: {
         imports = [
-          self.nixosModules.nymvpn
+          self.nixosModules.default
         ];
-        config.services.nymvpn = {
+        config.services.${moduleName} = {
           users = [user.userName];
           account.secret.enable = true;
           autoconnect.enable = true;
         };
       };
     };
-    nymvpn.gui = {
+    ${moduleName}.gui = {
       nixos = {
         config,
         user,
         ...
       }: {
-        config.services.nymvpn.gui.enable = true;
+        config.services.${moduleName}.gui.enable = true;
       };
     };
   };

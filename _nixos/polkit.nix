@@ -4,7 +4,7 @@
   pkgs,
   ...
 }: let
-  moduleName = "nymvpn";
+  moduleName = "nym-vpn";
 
   # Users allowed to access the NymVPN daemon through Polkit.
   # Change this to your local username(s).

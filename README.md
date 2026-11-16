@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="public/images/nymvpn.nixos.png" alt="NymVPN for Nixos" width="260">
+<img src="public/images/nym-vpn.nixos.png" alt="NymVPN for Nixos" width="260">
 
-# nymvpn.nixos
+# nym-vpn.nixos
 
 **[NymVPN](https://github.com/nymtech/nym-vpn-client) Privacy-preserving VPN for NixOs**
 
@@ -17,7 +17,7 @@ Add the repo url to your configuration(flake) input.
 ```nix
 #flake.nix
 inputs = {
-  nymvpn.url = "github:crocuda/nixos-nymvpn";
+  nym-vpn.url = "github:crocuda/nym-vpn.nixos";
 }
 ```
 
@@ -31,9 +31,9 @@ user,
 ...
 }: {
   imports = [
-    inputs.nymvpn.nixosModules.nymvpn
+    inputs.nym-vpn.nixosModules.default
   ];
-  config.services.nymvpn.users = [ <your_username> ];
+  config.services.nym-vpn.users = [ <your_username> ];
 }
 ```
 
@@ -49,9 +49,9 @@ user,
 ...
 }: {
   imports = [
-    inputs.nymvpn.nixosModules.nymvpn
+    inputs.nym-vpn.nixosModules.default
   ];
-  config.services.nymvpn = {
+  config.services.nym-vpn = {
     enable = true;
     users = [ <your_username> ];
     # Pin a core version.
@@ -92,7 +92,7 @@ In that case:
 - Disable the GUI installation via nix.
 
 ```nix
-config.services.nymvpn.gui.enable = false;
+config.services.nym-vpn.gui.enable = false;
 ```
 
 This option will:
@@ -111,7 +111,7 @@ Add the repo url to your configuration(flake) input.
 ```nix
 #flake.nix
 inputs = {
-  nymvpn.url = "github:crocuda/nixos-nymvpn";
+  nym-vpn.url = "github:crocuda/nym-vpn.nixos";
 }
 ```
 
@@ -121,13 +121,13 @@ No need to set further configuration.
 ```nix
 # random config file
 imports = [
-  inputs.nymvpn.flakeModules.default
+  inputs.nym-vpn.flakeModules.default
 ];
 den.aspects.<my_aspect> = {
   includes = [
-    nymvpn.aspects.nymvpn
+    nym-vpn.aspects.nym-vpn
     # or for autologin and autoconnect:
-    nymvpn.aspects.nymvpn.sops
+    nym-vpn.aspects.nym-vpn.sops
   ];
 };
 ```
@@ -139,7 +139,7 @@ den.aspects.<my_aspect> = {
 ```nix
 #flake.nix
 inputs = {
-  nymvpn.url = "github:crocuda/nixos-nymvpn";
+  nym-vpn.url = "github:crocuda/nym-vpn.nixos";
 }
 ```
 
@@ -150,7 +150,7 @@ sops edit secrets/secrets.yaml
 ```
 
 ```yaml
-nymvpn:
+nym-vpn:
   secret: |
     your 24 word secret seed
 ```
@@ -169,7 +169,7 @@ sops-nix = {
 imports = [
   inputs.sops-nix.nixosModules.sops
 ];
-config.services.nymvpn.account.secret.enable = true;
+config.services.nym-vpn.account.secret.enable = true;
 
 ```
 
