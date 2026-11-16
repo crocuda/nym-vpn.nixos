@@ -1,13 +1,13 @@
 # NYM GUI CLIENT
 {...}: {
-  flake.nixosModules.nym-vpn.nixos = {
+  flake.nixosModules.default = {
     lib,
     config,
     pkgs,
     ...
   }:
     with lib; let
-      gui = import ../packages/core.nix {
+      gui = import ../../_nixos/packages/core.nix {
         inherit lib;
         inherit config;
         inherit pkgs;

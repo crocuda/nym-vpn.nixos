@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.nym-vpn.nixos = {lib, ...}:
+  flake.nixosModules.default = {lib, ...}:
     with lib; {
       options.services.nym-vpn = {
         enable = mkEnableOption "Enable NymVPN daemon.";

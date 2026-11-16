@@ -1,13 +1,13 @@
 ## Secrets management
 {...}: {
-  flake.nixosModules.nym-vpn.nixos = {
+  flake.nixosModules.default = {
     lib,
     config,
     pkgs,
     ...
   }:
     with lib; let
-      core = import ../packages/core.nix {
+      core = import ../../_nixos/packages/core.nix {
         inherit lib;
         inherit config;
         inherit pkgs;

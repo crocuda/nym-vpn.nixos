@@ -5,7 +5,7 @@
   lib,
   ...
 }: {
-  flake.nixosModules.nym-vpn.nixos = {...}: let
+  flake.nixosModules.default = {...}: let
     plugin = import ./packages/nm_plugin.nix {
       inherit lib;
       inherit config;

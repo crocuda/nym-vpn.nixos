@@ -1,12 +1,12 @@
 {...}: {
-  flake.nixosModules.nym-vpn.nixos = {
+  flake.nixosModules.default = {
     lib,
     config,
     pkgs,
     ...
   }:
     with lib; let
-      core = import ../../../_nixos/packages/core.nix {
+      core = import ../../_nixos/packages/core.nix {
         inherit lib;
         inherit config;
         inherit pkgs;

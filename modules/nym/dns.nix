@@ -1,5 +1,5 @@
 {config, ...}: {
-  flake.nixosModules.nym-vpn.nixos = {
+  flake.nixosModules.default = {
     lib,
     config,
     pkgs,
