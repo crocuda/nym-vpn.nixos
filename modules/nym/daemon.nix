@@ -13,10 +13,6 @@
       };
       nym-vpn-core = core.nym-vpn-core;
     in {
-      imports = [
-        ./sops.nix
-      ];
-
       environment.systemPackages = with pkgs; [
         nym-vpn-core
         xdg-utils

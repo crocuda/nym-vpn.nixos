@@ -45,8 +45,7 @@
       buildInputs = with pkgs; [
         openssl
         pkg-config
-        rustup
-        rust-bin.stable.latest.default
+        pkgs.rust-bin.stable.latest.default
       ];
     };
 in {
