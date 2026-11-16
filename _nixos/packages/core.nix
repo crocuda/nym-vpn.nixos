@@ -1,8 +1,8 @@
 # Function that returns a set of packages
 {
-  lib,
   config,
   pkgs,
+  lib,
   ...
 }: let
   # The VPN core/daemon and commandline utility.

@@ -8,6 +8,8 @@
 
     ./daemon
 
+    ./networkmanager.nix
+
     ./gui.nix
   ];
 }

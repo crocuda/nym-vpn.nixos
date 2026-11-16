@@ -2,28 +2,22 @@
   lib,
   config,
   pkgs,
-  self,
   ...
 }:
 with lib; let
-  nym-vpn-core = import ../packages/core.nix;
+  core = import ../packages/core.nix {
+    inherit lib;
+    inherit config;
+    inherit pkgs;
+  };
+  nym-vpn-core = core.nym-vpn-core;
 in {
-  # Sops
   imports = [
+    ./sops.nix
   ];
-  #   (import ./sops.nix {
-  #     inherit lib;
-  #     inherit config;
-  #     inherit options;
-  #     inherit pkgs;
-  #     inherit nym-vpn-core;
-  #   })
-  # ];
 
   environment.systemPackages = with pkgs; [
-    # self.packages.nym-vpn-core
-    # nym-vpn-core
-
+    nym-vpn-core
     xdg-utils
     iproute2
     iptables
@@ -127,7 +121,6 @@ in {
           ''
             set -x
             ${nym-vpn-core}/bin/nym-vpnc lan set allow
-            # ${nym-vpn-core}/bin/nym-vpnc dns clear
             ${nym-vpn-core}/bin/nym-vpnc dns enable
           ''
           + (concatMapStrings

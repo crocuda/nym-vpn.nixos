@@ -69,6 +69,4 @@ with lib; {
       }
     ];
   };
-  networking.nftables.tables."nixos-fw".content = ''
-  '';
 }

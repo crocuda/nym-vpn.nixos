@@ -3,17 +3,23 @@
   lib,
   config,
   pkgs,
-  nym-vpn-core,
   ...
 }:
-with lib; {
+with lib; let
+  core = import ../packages/core.nix {
+    inherit lib;
+    inherit config;
+    inherit pkgs;
+  };
+  nym-vpn-core = core.nym-vpn-core;
+in {
   imports = [
     # inputs.sops-nix.nixosModules.sops
   ];
 
   ## WARNING: setting secret_key here might expose it to the nix cache
   # You might want to set a systemd unit environment file to prevent this.
-  sops.secrets."nymvpn/secret" = {
+  sops.secrets."nym-vpn/secret" = {
     owner = "root";
     group = "root";
     mode = "0440";

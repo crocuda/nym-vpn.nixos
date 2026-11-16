@@ -6,49 +6,13 @@
   ...
 }:
 with lib; let
-  moduleName = "nym-vpn";
-
-  nym-vpn-app = let
-    nymVpnAppVersion = config.services.${moduleName}.gui.version;
-    sha256 = config.services.${moduleName}.gui.sha256;
-    system = "amd64";
-  in
-    pkgs.appimageTools.wrapType2 {
-      pname = "nym-vpn-app";
-      version = nymVpnAppVersion;
-
-      src = pkgs.fetchurl {
-        url = "https://github.com/nymtech/nym-vpn-client/releases/download/nym-vpn-v${nymVpnAppVersion}/NymVPN_${nymVpnAppVersion}_${system}.AppImage";
-        inherit sha256;
-      };
-
-      extraPkgs = pkgs:
-        with pkgs; [
-          xdg-utils
-          gtk3
-          glib
-          webkitgtk_4_1
-          libayatana-appindicator
-        ];
-    };
-
-  nym-vpn-desktop = pkgs.makeDesktopItem {
-    name = "nym-vpn";
-    desktopName = "NymVPN";
-    exec = "${nym-vpn-app}/bin/nym-vpn-app -l %U";
-    terminal = false;
-    type = "Application";
-
-    categories = [
-      "Network"
-      "Security"
-    ];
-
-    mimeTypes = [
-      "x-scheme-handler/nymvpn"
-      "x-scheme-handler/nym-vpn"
-    ];
+  gui = import ../packages/core.nix {
+    inherit lib;
+    inherit config;
+    inherit pkgs;
   };
+  nym-vpn-app = gui.nym-vpn-app;
+  nym-vpn-desktop = gui.nym-vpn-desktop;
 in {
   config = mkMerge [
     (mkIf (config.services.nym-vpn.gui.enable == true)
