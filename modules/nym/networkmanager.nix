@@ -1,97 +1,196 @@
 # Function that returns a set of packages
-{
-  inputs,
-  lib,
-  ...
-}: {
-  flake.nixosModules.nym-vpn = {
+{inputs, ...}: {
+  flake.nixosModules.default = {
     pkgs,
     config,
     lib,
     self,
     ...
   }: let
-    nymVpnCoreVersion = config.services.nym-vpn.core.version;
-    # sha256 = config.services.nym-vpn.core.sha256;
-    sha256 = "sha256-UABxEQtT0Y2dWs5g6lolhD7a569MfM6j3vAXrQlxNuE=";
-    system = "x86_64";
-    nm_plugin = pkgs.rustPlatform.buildRustPackage rec {
-      pname = "networkManager-nymvpn";
-      name = pname;
+    networkmanager-nymvpn = let
+      nymVpnCoreVersion = config.services.nym-vpn.core.version;
+      # sha256 = config.services.nym-vpn.core.sha256;
+      sha256 = "sha256-UABxEQtT0Y2dWs5g6lolhD7a569MfM6j3vAXrQlxNuE=";
+      system = "x86_64";
+    in
+      pkgs.rustPlatform.buildRustPackage rec {
+        pname = "networkmanager-nymvpn";
+        name = pname;
 
-      description = "NetworkManager NymVPN plugin";
-      passthru = {
-        networkManagerPlugin = "VPN/nm-nym-service.name";
-      };
-      src =
-        pkgs.fetchFromGitHub {
-          owner = "nymtech";
-          repo = "nym-vpn-client";
-          rev = "nym-vpn-v${nymVpnCoreVersion}";
-          inherit sha256;
-        }
-        + "/nym-vpn-core";
-      # + "/nym-vpn-core/crate/nym-nm-vpn-plugin";
-
-      # srcRoot = src + "/crates/nym-nm-vpn-plugin";
-
-      # cargoDeps = pkgs.rustPlatform.importCargoLock {
-      #   lockFile = src + "/Cargo.lock";
-      #   # lockFile = src + "../../../Cargo.lock";
-      # };
-
-      cargoLock = {
-        lockFile = src + "/Cargo.lock";
-        # lockFile = src + "/nym-vpn-core" + "/Cargo.lock";
-        # lockFile = src + "../../../Cargo.lock";
-        outputHashes = {
-          # HINT: can use lib.fakeHash when hash is unknown
-          "nym-api-requests-1.22.3" = "sha256-DAGWQI4FJA/wPJ+MkzgcZFvKmhnAynEVFU729KeXwGA=";
-          # "dotenvy-0.15.7" = lib.fakeHash;
-          "nym-bridges-0.3.0" = "sha256-ybhWpqxymAe2ZzTofA+iHkm0MNQwKCa6WX4NbEr0HNo=";
+        description = "NetworkManager NymVPN plugin";
+        passthru = {
+          networkManagerPlugin = "VPN/nm-nymvpn-service.name";
+          updateScript = pkgs.gnome.updateScript {
+            packageName = pname;
+            attrPath = "networkmanager-nymvpn";
+          };
         };
+        src =
+          pkgs.fetchFromGitHub {
+            owner = "nymtech";
+            repo = "nym-vpn-client";
+            rev = "nym-vpn-v${nymVpnCoreVersion}";
+            inherit sha256;
+          }
+          + "/nym-vpn-core";
+
+        cargoLock = {
+          lockFile = src + "/Cargo.lock";
+          outputHashes = {
+            # HINT: can use lib.fakeHash when hash is unknown
+            "nym-api-requests-1.22.3" = "sha256-DAGWQI4FJA/wPJ+MkzgcZFvKmhnAynEVFU729KeXwGA=";
+            "nym-bridges-0.3.0" = "sha256-ybhWpqxymAe2ZzTofA+iHkm0MNQwKCa6WX4NbEr0HNo=";
+          };
+        };
+
+        doCheck = false;
+
+        patches = with pkgs; [
+          (replaceVars ./fix-paths.patch {
+            inherit libexec networkmanager;
+          })
+        ];
+
+        ## TODO: Create the editor libraries
+        buildPhase = ''
+          cargo build --release -p nym-nm-vpn-plugin
+          make -C crates/nym-nm-vpn-plugin/editor
+        '';
+        # See nym-nm-vpn-plugin/Cargo.toml for installation source -> target
+        installPhase = ''
+          SRC_PATH="/build/nym-vpn-core/crates/nym-nm-vpn-plugin"
+          # EDITOR_PATH="$SRC_PATH/editor/build"
+          PLUGIN_PATH="/build/nym-vpn-core/target/release"
+
+          mkdir -p $out/libexec
+          mkdir -p $out/lib/NetworkManager/{VPN,system-connections}
+          mkdir -p $out/share/dbus-1/system.d
+
+          # ls -alh $SRC_PATH
+          # ls -alh $PLUGIN_PATH
+          # ls -alh $SRC_PATH/editor
+          # ls -alh $SRC_PATH/editor/build/
+
+          # Copy executable
+          install -m755 $PLUGIN_PATH/nm-nymvpn-service $out/libexec
+          install -m755 $SRC_PATH/packaging/nm-nymvpn-auth-dialog $out/libexec
+          # Copy config files
+          # NetworkManager ignores keyfiles that are readable by others, hence 600.
+          install -m644 $SRC_PATH/packaging/nm-nymvpn-service.name $out/lib/NetworkManager/VPN/nm-nymvpn-service.name
+          install -m644 $SRC_PATH/packaging/nm-nymvpn-service.conf $out/share/dbus-1/system.d/nm-nymvpn-service.conf
+          install -m600 $SRC_PATH/packaging/NymVPN.nmconnection $out/lib/NetworkManager/system-connections/NymVPN.nmconnection
+          # Editor
+          install -m644 $SRC_PATH/editor/build/libnm-vpn-plugin-nymvpn.so $out/lib/NetworkManager/libnm-vpn-plugin-nymvpn.so
+          install -m644 $SRC_PATH/editor/build/libnm-vpn-plugin-nymvpn-editor.so $out/lib/NetworkManager/libnm-vpn-plugin-nymvpn-editor.so
+          install -m644 $SRC_PATH/editor/build/libnm-gtk4-vpn-plugin-nymvpn-editor.so $out/lib/NetworkManager/libnm-gtk4-vpn-plugin-nymvpn-editor.so
+        '';
+        nativeBuildInputs = with pkgs; [
+          networkmanager
+          openssl
+          pkg-config
+          pkgs.rust-bin.stable.latest.default
+          # Editor
+          libnma
+          libnma-gtk4
+          gtk4
+          gtk3
+          glib
+          glib-networking
+        ];
+        buildInputs = with pkgs; [
+          networkmanager
+          openssl
+          pkg-config
+          pkgs.rust-bin.stable.latest.default
+          # Editor
+          libnma
+          libnma-gtk4
+          gtk4
+          gtk3
+          glib
+          glib-networking
+        ];
+        # Protoc
+        PROTOBUF_LOCATION = "${pkgs.protobuf}";
+        PROTOC = "${PROTOBUF_LOCATION}/bin/protoc";
+        PROTOC_INCLUDE = "${PROTOBUF_LOCATION}/include";
       };
 
-      doCheck = false;
-
-      ## TODO: Create the editor libraries
-      buildPhase = ''
-        cargo build --release -p nym-nm-vpn-plugin
-        # make -C crates/nym-nm-vpn-plugin/editor
-      '';
-      installPhase = ''
-        PLUGIN_PATH="/build/nym-vpn-core/crates/nym-nm-vpn-plugin"
-        mkdir -p $out/bin
-        # cp target/release/nym-nymvpn-service $out/bin
-        # install -m755 target/release/build/nym-nymvpn-service $out/bin
-        ls -alh /build
-        ls -alh $PLUGIN_PATH
-        cp -r $PLUGIN_PATH/* $out/bin
-      '';
-
-      nativeBuildInputs = with pkgs; [
-        openssl
-        pkg-config
-        pkgs.rust-bin.stable.latest.default
-      ];
-      buildInputs = with pkgs; [
-        # networkmanager
-        openssl
-        pkg-config
-        pkgs.rust-bin.stable.latest.default
-      ];
-      # Protoc
-      PROTOBUF_LOCATION = "${pkgs.protobuf}";
-      PROTOC = "${PROTOBUF_LOCATION}/bin/protoc";
-      PROTOC_INCLUDE = "${PROTOBUF_LOCATION}/include";
-    };
+    autoconnect =
+      if (builtins.hasAttr "autoconnect" config.services.nym-vpn)
+      then config.services.nym-vpn.autoconnect.enable
+      else false;
   in {
     nixpkgs.overlays = [inputs.rust-overlay.overlays.default];
     environment.systemPackages = [pkgs.rust-bin.stable.latest.default];
     networking.networkmanager.plugins = with pkgs; [
       # self'.packages.networkmanager-plugin
-      # networkmanager-openvpn
-      nm_plugin
+      networkmanager-strongswan
+      networkmanager-openvpn
+      networkmanager-ssh
+      networkmanager-l2tp
+      networkmanager-nymvpn
     ];
+
+    # Works!
+
+    # networking.networkmanager.settings.main.plugins = "keyfile;nymvpn";
+    networking.networkmanager.ensureProfiles.profiles."NymVPN.nmconnection" = {
+      connection = {
+        id = "NymVPN";
+        uuid = "d6e3779f-2e64-4757-99fa-3e20c26592e4";
+        type = "vpn";
+        autoconnect = autoconnect;
+      };
+      vpn = {
+        service-type = "org.freedesktop.NetworkManager.nymvpn";
+        timeout = 120;
+      };
+      ipv4 = {
+        auto-route-ext-gw = 0;
+        method = "auto";
+      };
+      ipv6 = {
+        addr-gen-mode = "default";
+        auto-route-ext-gw = 0;
+        method = "auto";
+      };
+      proxy = {};
+    };
+
+    # Do not work!
+    # environment.etc = {
+    # "NetworkManager/sytem-connections/NymVPN.nmconnection".source = "${nm_plugin}/lib/NymVPN.nmconnection";
+    #   "NetworkManager/system-connections/NymVPN.nmconnection".text = ''
+    #     #
+    #     # Distro-provided NetworkManager profile for NymVPN, installed read-only under
+    #     # /usr/lib/NetworkManager/system-connections. The UUID is fixed so upgrades replace, not
+    #     # duplicate, the profile. Everything about the tunnel is configured in the NymVPN app.
+    #     #
+    #     # The daemon does all routing. The plugin reports no IP config, and auto-route-ext-gw=false stops
+    #     # NetworkManager from adding its route to the VPN gateway (NetworkManager 1.42+).
+    #     #
+    #     [connection]
+    #     id=NymVPN
+    #     uuid=d6e3779f-2e64-4757-99fa-3e20c26592e4
+    #     type=vpn
+    #     autoconnect=${lib.trivial.boolToString autoconnect}
+    #
+    #     [vpn]
+    #     service-type=org.freedesktop.NetworkManager.nymvpn
+    #     timeout=120
+    #
+    #     [ipv4]
+    #     auto-route-ext-gw=0
+    #     method=auto
+    #
+    #     [ipv6]
+    #     addr-gen-mode=default
+    #     auto-route-ext-gw=0
+    #     method=auto
+    #
+    #     [proxy]
+    #   '';
+    # };
   };
 }

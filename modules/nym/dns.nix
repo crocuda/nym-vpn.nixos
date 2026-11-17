@@ -1,5 +1,5 @@
 {config, ...}: {
-  flake.nixosModules.nym-vpn = {
+  flake.nixosModules.default = {
     lib,
     config,
     pkgs,
@@ -170,6 +170,7 @@
           inherit conflicts;
         };
         "systemd-resolved-update-resolvconf" = {
+          conflicts = ["unbound-update-resolvconf.service"];
           after = [
             "systemd-resolved.service"
             "systemd-tmpfiles-setup.service"
@@ -192,6 +193,7 @@
           ];
         };
         "unbound-update-resolvconf" = {
+          conflicts = ["systemd-resolved-update-resolvconf.service"];
           after = [
             "unbound.service"
             "systemd-tmpfiles-setup.service"

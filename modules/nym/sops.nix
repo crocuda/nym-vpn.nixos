@@ -1,6 +1,6 @@
 ## Secrets management
 {...}: {
-  flake.nixosModules.nym-vpn = {
+  flake.nixosModules.default = {
     lib,
     config,
     pkgs,
@@ -53,16 +53,16 @@
                 then
                   # Connect to account
                   ''
-                    if [ -f "${config.sops.secrets."nymvpn/secret".path}" ]; then
-                      NYM_SECRET=$(cat ${config.sops.secrets."nymvpn/secret".path})
+                    if [ -f "${config.sops.secrets."nym-vpn/secret".path}" ]; then
+                      NYM_SECRET=$(cat ${config.sops.secrets."nym-vpn/secret".path})
                       NYM_SECRET=$(echo $NYM_SECRET)
                       ${nym-vpn-core}/bin/nym-vpnc account set "$NYM_SECRET"
                     fi
                   ''
                   # Delete secret
                   + ''
-                    if [ -f "${config.sops.secrets."nymvpn/secret".path}" ]; then
-                      rm -rf ${config.sops.secrets."nymvpn/secret".path}
+                    if [ -f "${config.sops.secrets."nym-vpn/secret".path}" ]; then
+                      rm -rf ${config.sops.secrets."nym-vpn/secret".path}
                     fi
                   ''
                 else ""

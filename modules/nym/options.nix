@@ -1,5 +1,5 @@
 {lib, ...}: {
-  flake.nixosModules.nym-vpn = {lib, ...}:
+  flake.nixosModules.default = {lib, ...}:
     with lib; {
       options.services.nym-vpn = {
         enable = mkEnableOption "Enable NymVPN daemon.";
@@ -24,18 +24,6 @@
             description = "List of local dns to allow.";
           };
         };
-        account.secret.enable = mkOption {
-          type = types.bool;
-          default = false;
-          example = true;
-          description = "Enable sops account secret management.";
-        };
-        autoconnect.enable = mkOption {
-          type = types.bool;
-          default = false;
-          example = true;
-          description = "Connect as soon as possible.";
-        };
         core = {
           version = mkOption {
             type = types.str;
@@ -58,6 +46,18 @@
             type = types.str;
             default = "sha256-hZ7H+LVI5jzNuhTRH3HWS5aky8RVLyeUAtpB+gmmVDw=";
           };
+        };
+        account.secret.enable = mkOption {
+          type = types.bool;
+          default = false;
+          example = true;
+          description = "Enable sops account secret management.";
+        };
+        autoconnect.enable = mkOption {
+          type = types.bool;
+          default = false;
+          example = true;
+          description = "Connect as soon as possible.";
         };
       };
     };

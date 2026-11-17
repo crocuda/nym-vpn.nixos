@@ -1,0 +1,19 @@
+diff --git a/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name b/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
+index 8cda9158d..f1879218e 100644
+--- a/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
++++ b/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
+@@ -1,11 +1,11 @@
+ [VPN Connection]
+ name=nymvpn
+ service=org.freedesktop.NetworkManager.nymvpn
+-program=/usr/libexec/nm-nymvpn-service
++program=@LIBEXECDIR@/nm-nymvpn-service
+ supports-multiple-connections=false
+ 
+ [libnm]
+-plugin=/usr/lib/NetworkManager/libnm-vpn-plugin-nymvpn.so
++plugin=@PLUGINDIR@/libnm-vpn-plugin-nymvpn.so
+ 
+ [GNOME]
+-auth-dialog=/usr/libexec/nm-nymvpn-auth-dialog
++auth-dialog=@LIBEXECDIR@/nm-nymvpn-auth-dialog
