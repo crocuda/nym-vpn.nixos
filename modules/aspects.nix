@@ -8,9 +8,9 @@
         ...
       }: {
         imports = [
-          self.nixosModules.default
+          self.nixosModules.nym-vpn
         ];
-        config.services.nym-vpn.users = [user.userName];
+        services.nym-vpn.users = [user.userName];
       };
       sops = {
         nixos = {
@@ -18,10 +18,7 @@
           user,
           ...
         }: {
-          imports = [
-            self.nixosModules.default
-          ];
-          config.services.nym-vpn = {
+          services.nym-vpn = {
             users = [user.userName];
             account.secret.enable = true;
             autoconnect.enable = true;
@@ -34,7 +31,7 @@
           user,
           ...
         }: {
-          config.services.nym-vpn.gui.enable = true;
+          services.nym-vpn.gui.enable = true;
         };
       };
     };

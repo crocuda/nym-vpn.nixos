@@ -1,4 +1,4 @@
-{...}: {
+{lib, ...}: {
   flake.nixosModules.nym-vpn = {lib, ...}:
     with lib; {
       options.services.nym-vpn = {

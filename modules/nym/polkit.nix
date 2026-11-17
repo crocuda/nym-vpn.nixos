@@ -1,6 +1,6 @@
 # POLKIT
 {...}: {
-  flake.nixosModules.nym-vpn = {lib, ...}: {
+  flake.nixosModules.nym-vpn = {
     config,
     pkgs,
     ...

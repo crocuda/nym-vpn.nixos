@@ -1,5 +1,9 @@
 # Function that returns a set of packages
-{inputs, ...}: {
+{
+  inputs,
+  lib,
+  ...
+}: {
   flake.nixosModules.nym-vpn = {
     pkgs,
     config,
