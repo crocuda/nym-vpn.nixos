@@ -1,6 +1,6 @@
 {
-  self,
   inputs,
+  lib,
   ...
 }: {
   imports = [
@@ -8,45 +8,22 @@
     (inputs.flake-file.flakeModules.dendritic or {})
     (inputs.den.flakeModules.dendritic or {})
   ];
+  flake-file.inputs = {
+    ###################################
+    ## NixOs pkgs
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:nixos/nixpkgs/nixos-26.05";
 
-  nym-vpn.aspects = rec {
-    default = nym-vpn;
-    nym-vpn = {
-      nixos = {
-        config,
-        user,
-        ...
-      }: {
-        imports = [
-          self.nixosModules.default
-        ];
-        config.services.nym-vpn.users = [user.userName];
-      };
-      sops = {
-        nixos = {
-          config,
-          user,
-          ...
-        }: {
-          imports = [
-            self.nixosModules.default
-          ];
-          config.services.nym-vpn = {
-            users = [user.userName];
-            account.secret.enable = true;
-            autoconnect.enable = true;
-          };
-        };
-      };
-      gui = {
-        nixos = {
-          config,
-          user,
-          ...
-        }: {
-          config.services.nym-vpn.gui.enable = true;
-        };
-      };
+    ###################################
+    ## Dendritic
+    flake-file.url = lib.mkDefault "github:vic/flake-file";
+    flake-parts.url = lib.mkDefault "github:hercules-ci/flake-parts";
+    import-tree.url = "github:denful/import-tree";
+    den.url = "github:denful/den";
+
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 }

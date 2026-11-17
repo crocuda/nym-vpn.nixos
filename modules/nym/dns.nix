@@ -1,5 +1,5 @@
 {config, ...}: {
-  flake.nixosModules.default = {
+  flake.nixosModules.nym-vpn = {
     lib,
     config,
     pkgs,
@@ -177,7 +177,8 @@
           ];
           wantedBy = ["systemd-resolved.service"];
           serviceConfig = {
-            # Type = "oneshot";
+            Type = "oneshot";
+            RemainAfterExit = "yes";
             ExecStart = systemdResolvedResolvconf;
             ExecStop = defaultResolvconf;
           };
@@ -198,7 +199,8 @@
           ];
           wantedBy = ["unbound.service"];
           serviceConfig = {
-            # Type = "oneshot";
+            Type = "oneshot";
+            RemainAfterExit = "yes";
             ExecStart = unboundResolvconf;
             ExecStop = defaultResolvconf;
           };

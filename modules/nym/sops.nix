@@ -1,6 +1,6 @@
 ## Secrets management
 {...}: {
-  flake.nixosModules.default = {
+  flake.nixosModules.nym-vpn = {
     lib,
     config,
     pkgs,

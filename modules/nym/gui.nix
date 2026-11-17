@@ -1,6 +1,6 @@
 # NYM GUI CLIENT
 {...}: {
-  flake.nixosModules.default = {
+  flake.nixosModules.nym-vpn = {
     lib,
     config,
     pkgs,

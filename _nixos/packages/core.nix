@@ -52,7 +52,6 @@
           install -m755 nym-exclude $out/bin/nym-exclude
         fi
 
-        cp -r * $out
       '';
     };
 in {
