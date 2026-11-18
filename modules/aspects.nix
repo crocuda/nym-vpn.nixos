@@ -1,14 +1,10 @@
-{
-  self,
-  nym-vpn,
-  ...
-}: {
+{self, ...}: {
   nym-vpn.aspects = rec {
     default = nym-vpn;
     nym-vpn = {
       nixos = {user, ...}: {
         imports = [
-          self.nixosModules.default
+          # self.nixosModules.default
         ];
         services.nym-vpn.users = [user.userName];
       };

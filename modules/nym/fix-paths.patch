@@ -1,7 +1,9 @@
 diff --git a/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name b/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
 index 8cda9158d..f1879218e 100644
---- a/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
-+++ b/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
+# --- a/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
+# +++ b/nym-vpn-core/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
+--- a/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
++++ b/crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name
 @@ -1,11 +1,11 @@
  [VPN Connection]
  name=nymvpn

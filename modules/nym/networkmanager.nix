@@ -25,6 +25,7 @@
             attrPath = "networkmanager-nymvpn";
           };
         };
+
         src =
           pkgs.fetchFromGitHub {
             owner = "nymtech";
@@ -34,6 +35,13 @@
           }
           + "/nym-vpn-core";
 
+        patches = [./fix-paths.patch];
+        postPatch = ''
+          substituteInPlace crates/nym-nm-vpn-plugin/packaging/nm-nymvpn-service.name \
+            --replace-fail @PLUGINDIR@ $out/lib/NetworkManager \
+            --replace-fail @LIBEXECDIR@ $out/libexec
+        '';
+
         cargoLock = {
           lockFile = src + "/Cargo.lock";
           outputHashes = {
@@ -42,14 +50,7 @@
             "nym-bridges-0.3.0" = "sha256-ybhWpqxymAe2ZzTofA+iHkm0MNQwKCa6WX4NbEr0HNo=";
           };
         };
-
         doCheck = false;
-
-        patches = with pkgs; [
-          (replaceVars ./fix-paths.patch {
-            inherit libexec networkmanager;
-          })
-        ];
 
         ## TODO: Create the editor libraries
         buildPhase = ''
@@ -80,9 +81,10 @@
           install -m644 $SRC_PATH/packaging/nm-nymvpn-service.conf $out/share/dbus-1/system.d/nm-nymvpn-service.conf
           install -m600 $SRC_PATH/packaging/NymVPN.nmconnection $out/lib/NetworkManager/system-connections/NymVPN.nmconnection
           # Editor
-          install -m644 $SRC_PATH/editor/build/libnm-vpn-plugin-nymvpn.so $out/lib/NetworkManager/libnm-vpn-plugin-nymvpn.so
-          install -m644 $SRC_PATH/editor/build/libnm-vpn-plugin-nymvpn-editor.so $out/lib/NetworkManager/libnm-vpn-plugin-nymvpn-editor.so
-          install -m644 $SRC_PATH/editor/build/libnm-gtk4-vpn-plugin-nymvpn-editor.so $out/lib/NetworkManager/libnm-gtk4-vpn-plugin-nymvpn-editor.so
+          # default -m644
+          install -m755 $SRC_PATH/editor/build/libnm-vpn-plugin-nymvpn.so $out/lib/NetworkManager
+          install -m755 $SRC_PATH/editor/build/libnm-vpn-plugin-nymvpn-editor.so $out/lib/NetworkManager
+          install -m755 $SRC_PATH/editor/build/libnm-gtk4-vpn-plugin-nymvpn-editor.so $out/lib/NetworkManager
         '';
         nativeBuildInputs = with pkgs; [
           networkmanager
@@ -134,7 +136,8 @@
 
     # Works!
 
-    # networking.networkmanager.settings.main.plugins = "keyfile;nymvpn";
+    networking.networkmanager.settings.main.plugins = "keyfile;openvpn;nymvpn";
+
     networking.networkmanager.ensureProfiles.profiles."NymVPN.nmconnection" = {
       connection = {
         id = "NymVPN";
