@@ -43,6 +43,7 @@
       ];
 
       installPhase = ''
+        # ls -alhg
         mkdir -p $out/bin
 
         install -m755 nym-vpnd $out/bin/nym-vpnd

@@ -74,15 +74,16 @@
               config.services.nym-vpn.logLevel
             };
         in {
-          # ExecStart = "${nym-vpn-core}/bin/nym-vpnd -v run-as-service";
-          ExecStart = let
-            name = "nym-vpnd-run";
-            text = ''
-              set -x
-              ${nym-vpn-core}/bin/nym-vpnd ${verbosity} run-with-args
-            '';
-            script = pkgs.writeShellScriptBin name text;
-          in "${script}/bin/${name}";
+          ExecStart = "${nym-vpn-core}/bin/nym-vpnd -v run-as-service";
+          # ExecStart = let
+          #   name = "nym-vpnd-run";
+          #   text = ''
+          #     set -x
+          #     ${nym-vpn-core}/bin/nym-vpnd ${verbosity} run-with-args
+          #     # ${nym-vpn-core}/bin/nym-vpnd ${verbosity} run-as-service
+          #   '';
+          #   script = pkgs.writeShellScriptBin name text;
+          # in "${script}/bin/${name}";
 
           Restart = "always";
           RestartSec = 2;

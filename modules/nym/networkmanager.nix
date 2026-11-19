@@ -125,19 +125,19 @@
   in {
     nixpkgs.overlays = [inputs.rust-overlay.overlays.default];
     environment.systemPackages = [pkgs.rust-bin.stable.latest.default];
-    networking.networkmanager.plugins = with pkgs; [
-      # self'.packages.networkmanager-plugin
-      networkmanager-strongswan
-      networkmanager-openvpn
-      networkmanager-ssh
-      networkmanager-l2tp
+
+    networking.networkmanager.plugins = [
       networkmanager-nymvpn
     ];
 
+    users.users = {
+      nm-nymvpn = {
+        isSystemUser = true;
+        group = "networkmanager";
+      };
+    };
+
     # Works!
-
-    networking.networkmanager.settings.main.plugins = "keyfile;openvpn;nymvpn";
-
     networking.networkmanager.ensureProfiles.profiles."NymVPN.nmconnection" = {
       connection = {
         id = "NymVPN";

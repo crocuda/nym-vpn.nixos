@@ -63,6 +63,7 @@
             nameserver ::1
             options edns0 trust-ad
             search .
+            # search ~.
           ''
         );
       };
@@ -117,8 +118,8 @@
         # Recreate a compatible /etc/resolv.conf that points to systemd-resolved.
         systemdResolvedResolvconf = let
           name = "systemd-resolved-resolvconf";
-          config = "/run/systemd/resolve/stub-resolv.conf";
-          # config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
+          # config = "/run/systemd/resolve/stub-resolv.conf";
+          config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
           text = ''
             set -x
             set +e
