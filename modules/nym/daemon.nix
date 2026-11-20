@@ -25,19 +25,12 @@
       # NYM DAEMON
       systemd.services.nym-vpnd = {
         description = "nym-vpnd daemon";
-
-        after = [
-          "systemd-resolved.service"
-          "NetworkManager.service"
-        ];
-
         before = [
           "network-online.target"
         ];
-
-        # bindsTo = mkDefault ["systemd-resolved.service"];
-        # requires = ["systemd-resolved.service"];
-        wants = ["systemd-resolved.service"];
+        after = [
+          "NetworkManager.service"
+        ];
         wantedBy = [
           "multi-user.target"
           "NetworkManager.service"
@@ -74,16 +67,15 @@
               config.services.nym-vpn.logLevel
             };
         in {
-          ExecStart = "${nym-vpn-core}/bin/nym-vpnd -v run-as-service";
-          # ExecStart = let
-          #   name = "nym-vpnd-run";
-          #   text = ''
-          #     set -x
-          #     ${nym-vpn-core}/bin/nym-vpnd ${verbosity} run-with-args
-          #     # ${nym-vpn-core}/bin/nym-vpnd ${verbosity} run-as-service
-          #   '';
-          #   script = pkgs.writeShellScriptBin name text;
-          # in "${script}/bin/${name}";
+          # ExecStart = "${nym-vpn-core}/bin/nym-vpnd -v run-as-service";
+          ExecStart = let
+            name = "nym-vpnd-run";
+            text = ''
+              set -x
+              ${nym-vpn-core}/bin/nym-vpnd ${verbosity} run-with-args
+            '';
+            script = pkgs.writeShellScriptBin name text;
+          in "${script}/bin/${name}";
 
           Restart = "always";
           RestartSec = 2;

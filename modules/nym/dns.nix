@@ -59,12 +59,13 @@
             #
           ''
           + ''
-            nameserver 127.0.0.53
             nameserver ::1
+            nameserver 127.0.0.53
             options edns0 trust-ad
             search .
-            # search ~.
           ''
+          # or
+          # search ~.
         );
       };
 
@@ -80,6 +81,7 @@
         enable = true;
         settings = {
           Resolve = {
+            DNSStubListener = true;
             # ipv6 support
             DNSStubListenerExtra = "[::1]:53";
             DNSSEC = false;
@@ -104,7 +106,6 @@
         defaultResolvconf = let
           name = "systemd-resolved-resolvconf";
           config = "/run/systemd/resolve/resolv.conf";
-          # config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
           text = ''
             set -x
             set +e
@@ -118,16 +119,13 @@
         # Recreate a compatible /etc/resolv.conf that points to systemd-resolved.
         systemdResolvedResolvconf = let
           name = "systemd-resolved-resolvconf";
-          # config = "/run/systemd/resolve/stub-resolv.conf";
-          config = "/etc/static/resolv.conf.d/resolv.conf.systemd-resolved";
+          config = "/run/systemd/resolve/stub-resolv.conf";
+          # config = "/etc/resolv.conf.d/resolv.conf.systemd-resolved";
           text = ''
             set -x
             set +e
             if [ -e "${config}" ]; then
               ${pkgs.coreutils}/bin/ln -fs ${config} /etc/resolv.conf
-            # NymVPN backub
-            # elif [ -e "/etc/resolv.conf.nymbackup" ]; then
-            #   ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.nymbackup /etc/resolv.conf
             fi
             exit 0
           '';
@@ -143,9 +141,6 @@
             set +e
             if [ -e "${config}" ]; then
               ${pkgs.coreutils}/bin/ln -fs ${config} /etc/resolv.conf
-            # NymVPN backub
-            # elif [ -e "/etc/resolv.conf.nymbackup" ]; then
-            #   ${pkgs.coreutils}/bin/ln -fs /etc/resolv.conf.nymbackup /etc/resolv.conf
             fi
             exit 0
           '';
@@ -160,7 +155,10 @@
             (mkIf
               ((config.services.unbound.enable == true)
                 || (config.services.unbound.settings.server.port == "53"))
-              ["unbound.service"])
+              [
+                "unbound.service"
+                "unbound-update-resolvconf.service"
+              ])
             ["resolvconf.service"]
           ];
       in {
@@ -169,15 +167,24 @@
         };
         nym-vpnd = {
           inherit conflicts;
-        };
-        "systemd-resolved-update-resolvconf" = {
-          conflicts = ["unbound-update-resolvconf.service"];
           after = [
             "systemd-resolved.service"
+          ];
+          requires = [
+            "systemd-resolved.service"
+          ];
+        };
+        "systemd-resolved-update-resolvconf" = {
+          conflicts = [
+            "unbound-update-resolvconf.service"
+          ];
+          after = [
+            "systemd-resolved.service"
+            # Start after temporary files creation.
             "systemd-tmpfiles-setup.service"
             "systemd-tmpfiles-resetup.service"
           ];
-          wantedBy = ["systemd-resolved.service"];
+          requiredBy = ["systemd-resolved.service"];
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = "yes";
@@ -187,20 +194,24 @@
         };
 
         unbound = {
-          after = ["systemd-resolved.service"];
-          before = ["nym-vpnd.service"];
+          before = [
+            "systemd-resolved.service"
+          ];
           conflicts = [
             "systemd-resolved.service"
           ];
         };
         "unbound-update-resolvconf" = {
-          conflicts = ["systemd-resolved-update-resolvconf.service"];
+          conflicts = [
+            "systemd-resolved-update-resolvconf.service"
+          ];
           after = [
             "unbound.service"
+            # Start after temporary files creation.
             "systemd-tmpfiles-setup.service"
             "systemd-tmpfiles-resetup.service"
           ];
-          wantedBy = ["unbound.service"];
+          requiredBy = ["unbound.service"];
           serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = "yes";

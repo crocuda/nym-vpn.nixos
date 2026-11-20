@@ -31,6 +31,7 @@
 
           # systemd-resolved
           5355
+          5353
           53
 
           9000
@@ -54,6 +55,7 @@
 
           # systemd-resolved
           5355
+          5353
           53
         ];
         allowedTCPPortRanges = [

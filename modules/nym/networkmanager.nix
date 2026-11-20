@@ -130,15 +130,8 @@
       networkmanager-nymvpn
     ];
 
-    users.users = {
-      nm-nymvpn = {
-        isSystemUser = true;
-        group = "networkmanager";
-      };
-    };
-
     # Works!
-    networking.networkmanager.ensureProfiles.profiles."NymVPN.nmconnection" = {
+    networking.networkmanager.ensureProfiles.profiles."NymVPN" = {
       connection = {
         id = "NymVPN";
         uuid = "d6e3779f-2e64-4757-99fa-3e20c26592e4";
@@ -150,12 +143,15 @@
         timeout = 120;
       };
       ipv4 = {
-        auto-route-ext-gw = 0;
+        # gateway = "127.0.0.1";
+        # dns = "9.9.9.9";
+        auto-route-ext-gw = 0; #-1;
         method = "auto";
       };
       ipv6 = {
+        # gateway = "::1";
         addr-gen-mode = "default";
-        auto-route-ext-gw = 0;
+        auto-route-ext-gw = 0; #-1;
         method = "auto";
       };
       proxy = {};
