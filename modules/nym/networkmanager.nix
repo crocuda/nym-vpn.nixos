@@ -10,7 +10,7 @@
     networkmanager-nymvpn = let
       nymVpnCoreVersion = config.services.nym-vpn.core.version;
       # sha256 = config.services.nym-vpn.core.sha256;
-      sha256 = "sha256-UABxEQtT0Y2dWs5g6lolhD7a569MfM6j3vAXrQlxNuE=";
+      sha256 = "sha256-AGo3O/5xlToDsoIhQLe6FCw3cdiN4BQu8E5+eh1NQiU=";
       system = "x86_64";
     in
       pkgs.rustPlatform.buildRustPackage rec {

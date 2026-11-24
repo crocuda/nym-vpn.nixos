@@ -27,20 +27,20 @@
         core = {
           version = mkOption {
             type = types.str;
-            default = "2026.15.0";
-            example = "2026.15.0";
+            default = "2026.16.0";
+            example = "2026.16.0";
           };
           sha256 = mkOption {
             type = types.str;
-            default = "sha256-SkbS2fs9ytC8r3PvHrw7/PDyjq1M1TAEsM7QuMTgD80=";
+            default = "sha256-nPbCiOW33S1kN9PD0qlTyqMg2oqcYG00pKuOz5bWx84=";
           };
         };
         gui = {
           enable = mkEnableOption "Enable the graphical user interface.";
           version = mkOption {
             type = types.str;
-            default = "2026.15.0";
-            example = "2026.15.0";
+            default = "2026.16.0";
+            example = "2026.16.0";
           };
           sha256 = mkOption {
             type = types.str;

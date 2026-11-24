@@ -98,6 +98,8 @@
 
       systemd.services.nym-vpnd-dns = {
         enable = config.services.nym-vpn.autoconnect.enable;
+
+        wantedBy = ["nym-vpnd.service"];
         after = ["nym-vpnd.service"];
 
         serviceConfig = {
